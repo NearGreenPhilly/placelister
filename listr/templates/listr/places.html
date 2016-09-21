@@ -1,0 +1,135 @@
+<html>
+{% include 'listr/base.html' %}
+<head>
+    <script src="https://maps.googleapis.com/maps/api/js?v=3.exp&sensor=false&libraries=places"></script>
+</head>
+<body>
+
+
+	<div class="row text-center">
+
+        <div class="col-sm-6 col-sm-offset-3">
+            <form id="place_form" method="post" action="/listr/places/">
+                {% csrf_token %}
+            <input id="searchTextField" name="searchTextField" type="text" size="50">
+            </form>
+        </div>
+
+
+		<div class="col-sm-4">
+			<div class="panel panel-default">
+				<div class="panel-heading" style="padding-bottom: 35px">
+					All Places
+				</div>
+				<div class="panel-body">
+
+					{% for s in places %}
+
+
+                    <div class="col-sm-12 col-md-12 text-center">
+                            <div class="col-sm-4 col-md-4">
+                                {{ s.name}}
+                            </div>
+
+                            <div class="col-sm-2 col-md-2">
+                                {{ s.type}}
+                            </div>
+
+                            <div class="col-sm-4 col-md-4">
+                                {{ s.list_count}}
+                            </div>
+
+							<div class="col-sm-2 col-md-2">
+                                <a data-place="{{ s.name }}" title="Add this item" class="open-AddBookDialog btn btn-info btn-xs" href="#addBookDialog">Add</a>
+                            </div>
+
+
+                    </div>
+
+					{% endfor %}
+
+				</div>
+			</div>
+		</div>
+  	</div>
+
+<div class="modal fade" id="addBookDialog" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+        <form id="bet_form" method="post" action="/listr/places/">
+            {% csrf_token %}
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+            <h4 class="modal-title" id="myModalLabel">Place Bet</h4>
+          </div>
+          <div class="modal-body">
+
+              <section class="row">
+                  <div class="col-xs-12" style="height:40px;"></div>
+                  <div class="col-sm-6 col-md-6 text-center">
+				    <label id="lbltipAddedComment">Option 1 </label>
+                    <br>
+                    <label id="pickusrlabel">Add to Which List?</label>
+                      <input type="hidden" id="placename" name="placename"></input>
+                  </div>
+                  <div class="col-sm-6 col-md-6 text-center">
+                      <select name="lists" id="select_list" style="width: 100%" required>
+                                    <option selected="selected" disabled value="">Select a list</option>
+                                    {% for s in user_lists %}
+                                    <option value={{ s.id }}>{{ s.name }} </option>
+                                    {% endfor %}
+                      </select>
+                  </div>
+
+              </section>
+
+
+
+
+          </div>
+          <div class="modal-footer">
+              <p>
+
+
+              </p>
+            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            <button type="submit" class="btn btn-primary">Add to List</button>
+          </div>
+          </form>
+        </div><!-- /.modal-content -->
+      </div><!-- /.modal-dialog -->
+    </div><!-- /.modal -->
+
+
+<script>
+
+        function initialize() {
+
+        var input = document.getElementById('searchTextField');
+        var autocomplete = new google.maps.places.Autocomplete(input);
+        }
+
+        google.maps.event.addDomListener(window, 'load', initialize);
+
+        $(document).on("click", ".open-AddBookDialog", function (e) {
+
+        e.preventDefault();
+
+        var _self = $(this);
+
+        var name = _self.data('place');
+        document.getElementById('lbltipAddedComment').innerHTML = name;
+
+
+        $("#placename").val(name);
+////        var myCookId = _self.data('away');
+//        $("#betAway").val(awayteam);
+
+        $(_self.attr('href')).modal('show');
+        });
+
+    </script>
+
+
+</body>
+</html>

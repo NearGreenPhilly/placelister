@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+    {% include 'listr/base.html' %}
+    <link rel="stylesheet" href="/static/css/form.css">
+    <body>
+          <div class='container text-center'>
+              <form class="form-horizontal" id="list_form" method="post" action="/listr/new_list/"
+                enctype="multipart/form-data">
+                {% csrf_token %}
+                {% load bootstrap %} 
+
+                <table>
+                  <tr>
+                     
+                      <td class="container text-center">{{ list_form.name | bootstrap_horizontal}}</td>
+                  </tr>
+
+                  <tr>
+                     
+                      <td class="container text-center">{{ list_form.type | bootstrap_horizontal}}</td>
+                  </tr>
+
+                  <tr>
+                     
+                      <td class="container text-center">{{ list_form.location | bootstrap_horizontal}}</td>
+                  </tr>
+
+                </table>
+                <button class="btn btn-lg btn-primary" type="submit">Create New</button>
+                <input type="hidden" name="submit" value="New" />
+              </form>
+            </div>
+    </body>
+</html>
+

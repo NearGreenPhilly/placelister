@@ -1,0 +1,33 @@
+<html>
+{% include 'listr/base.html' %}
+<body>
+
+
+	<div class="row text-center">
+
+		<div class="col-sm-4">
+			<div class="panel panel-default">
+				<div class="panel-heading" style="padding-bottom: 35px">
+					<div class="col-sm-8">
+					Your Lists
+					</div>
+					<div class="col-sm-4 text-right">
+						<a class="btn btn-large btn-info" href="/listr/new_list">New List</a>
+					</div>
+				</div>
+				<div class="panel-body">
+					{% for s in lists %}
+
+						<a href="/listr/{{s.id}}">{{s.name}}</a>
+
+						<br>
+
+					{% endfor %}
+				</div>
+			</div>
+		</div>
+  	</div>
+
+
+</body>
+</html>
