@@ -106,7 +106,10 @@
         function initialize() {
 
         var input = document.getElementById('searchTextField');
-        var autocomplete = new google.maps.places.Autocomplete(input);
+
+        var key = 'AIzaSyAw6qAq8Db2M44gdfWT0-67qYJ5h7yD6hM';
+
+        var autocomplete = new google.maps.places.Autocomplete(input, key);
         }
 
         google.maps.event.addDomListener(window, 'load', initialize);
