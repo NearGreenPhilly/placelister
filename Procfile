@@ -1,1 +1,1 @@
-web: gunicorn placelist.wsgi:listr --preload --workers 1
+web: gunicorn placelist.wsgi --preload --workers 1
