@@ -12,6 +12,8 @@ class Place(models.Model):
     city = models.CharField(max_length=100)
     neighborhood = models.CharField(max_length=100, null=True)
     address = models.CharField(max_length=100)
+    url = models.CharField(max_length=100, null=True)
+
     state = models.CharField(max_length=100)
     zip_code = models.CharField(max_length=5, null=True)
 
