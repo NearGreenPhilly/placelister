@@ -33,13 +33,13 @@ class List(models.Model):
     name = models.CharField(max_length=100)
     type = models.CharField(max_length=50)
     location = models.CharField(max_length=100)
-    created_by = models.ForeignKey(User)
+    created_by = models.ForeignKey(User, related_name='collaborators')
     created_on = models.DateTimeField(auto_now_add=True)
     updated_on = models.DateTimeField(auto_now_add=True)
 
     places = models.ManyToManyField(Place)
 
-    # collaborators = models.ManyToManyField(User)
+    collaborators = models.ManyToManyField(User, related_name='created_by')
 
     def __unicode__(self):              # __unicode__ on Python 2
         return str(self.id)
