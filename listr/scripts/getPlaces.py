@@ -61,55 +61,60 @@ def processPlace(ast):
 
     query_results = doSearch(new_place)
 
+    isMade = False
+
     for gresult in query_results.places:
 
-        if str((gresult.name).encode('utf8')) == new_place['name'] or str((gresult.name).encode('utf8')) in new_place['name'] or str((gresult.name).encode('utf8')).replace("'","") in new_place['name'].replace("'",""):
+        if isMade == False:
 
-            # print("Name is the same")
+            if str((gresult.name).encode('utf8')) == new_place['name'] or str((gresult.name).encode('utf8')) in new_place['name'] or str((gresult.name).encode('utf8')).replace("'","") in new_place['name'].replace("'",""):
 
-
-            aplace = new_place
-            aplace['lat'] = float(gresult.geo_location['lat'])
-            aplace['lon'] = float(gresult.geo_location['lng'])
+                # print("Name is the same")
 
 
-
-            gresult.get_details()
-
-            a = gresult.formatted_address.split(",")
-
-            city = str(a[len(a)-3].encode('utf8')).strip()
-            state = str(a[len(a)-2].encode('utf8')).strip()
+                aplace = new_place
+                aplace['lat'] = float(gresult.geo_location['lat'])
+                aplace['lon'] = float(gresult.geo_location['lng'])
 
 
-            if city == new_place['city']:
 
-                # print("City is the same")
+                gresult.get_details()
 
-                aplace['address'] = str(a[0].encode('utf8'))
-                aplace['type'] = str(gresult.types[0].encode('utf8'))
+                a = gresult.formatted_address.split(",")
 
-                cplaces = Place.objects.filter(name=aplace['name'])
+                city = str(a[len(a)-3].encode('utf8')).strip()
+                state = str(a[len(a)-2].encode('utf8')).strip()
 
 
-                if len(cplaces) == 0:
-                    if 'context' in aplace:
-                        if aplace['context'] in aplace['address']:
+                if city == new_place['city']:
 
-                            makePlace(aplace)
-                    else:
+                    # print("City is the same")
+
+                    aplace['address'] = str(a[0].encode('utf8'))
+                    aplace['type'] = str(gresult.types[0].encode('utf8'))
+
+                    cplaces = Place.objects.filter(name=aplace['name'])
+
+
+                    if len(cplaces) == 0:
+                        # if 'context' in aplace:
+                        #     if aplace['context'] in aplace['address']:
+                        #
+                        #         makePlace(aplace)
+                        # else:
+                        #     makePlace(aplace)
+
                         makePlace(aplace)
+                        isMade = True
+                        print("Place made")
 
-                    makePlace(aplace)
-                    print("Place made")
 
-
-                # else:
-                #     if 'context' in aplace:
-                #         if aplace['context'] in aplace['address']:
-                #             for tp in cplaces:
-                #                 if aplace['context'] not in tp.address and aplace['context'] not in tp.name:
-                #                     makePlace(aplace)
+                    # else:
+                    #     if 'context' in aplace:
+                    #         if aplace['context'] in aplace['address']:
+                    #             for tp in cplaces:
+                    #                 if aplace['context'] not in tp.address and aplace['context'] not in tp.name:
+                    #                     makePlace(aplace)
 
 
 
