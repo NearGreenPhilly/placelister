@@ -67,11 +67,15 @@ class UserProfile(models.Model):
 
 class Profile(models.Model):
     user = models.ForeignKey(User)
+    friends = models.ManyToManyField(User, related_name='user')
     oauth_token = models.CharField(max_length=200)
     oauth_secret = models.CharField(max_length=200)
 
     def __unicode__(self):
         return unicode(self.user)
+
+
+
 
 class InstagramProfile(models.Model):
     user = models.ForeignKey(User)

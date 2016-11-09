@@ -1,17 +1,17 @@
 # Django
 from django.shortcuts import render, render_to_response
-from django.contrib.auth import logout
-from django.template import RequestContext, loader
-from django.contrib.auth import authenticate, login
+# from django.contrib.auth import logout
+# from django.template import RequestContext, loader
+# from django.contrib.auth import authenticate, login
 from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
-from django.conf import settings
+# from django.conf import settings
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
-from django.contrib.auth.decorators import login_required
-from django.views.decorators.csrf import csrf_exempt
-from django.shortcuts import get_object_or_404
+# from django.contrib.auth.decorators import login_required
+# from django.views.decorators.csrf import csrf_exempt
+# from django.shortcuts import get_object_or_404
 from django.views.generic import DetailView
-from django.urls import reverse
+# from django.urls import reverse
 from django.core.serializers import serialize
 
 
@@ -21,13 +21,12 @@ from scripts.instagram import *
 from scripts.facebook import *
 from scripts.googlePlus import *
 from scripts.twitter import TwitterOauthClient
-from scripts.scraper import steamDiscounts
 from scripts.getPlaces import *
 
 # Python
-import oauth2 as oauth
-import simplejson as json
-import requests
+# import oauth2 as oauth
+# import simplejson as json
+# import requests
 from pprint import pprint
 
 # Models
@@ -56,7 +55,7 @@ class PlacesList(DetailView):
           geometry_field='point',
           fields=('name',))
 
-        pprint(gj)
+        # pprint(gj)
 
         context = super(PlacesList, self).get_context_data(**kwargs)
         context['clist'] = [clist]
@@ -70,16 +69,31 @@ class PlacesList(DetailView):
 
     def post(self, request, *args, **kwargs):
 
-        ast = str(request.POST.get('searchTextField'))
+
+        data = {}
+
+        data['name'] = str(request.POST.get('searchName').encode('utf8'))
+
+        data['neighborhood'] = str(request.POST.get('searchNeighborhood').encode('utf8'))
+
+        data['address'] = str(request.POST.get('searchAddress').encode('utf8'))
+
+        data['city'] = str(request.POST.get('searchCity').encode('utf8'))
+
+        data['state'] = str(request.POST.get('searchState').encode('utf8'))
+
+        data['url'] = str(request.POST.get('searchURL').encode('utf8'))
+
+        print(data)
+
+
         listid = self.kwargs['pk']
 
-        if ast != 'None':
+        if data != 'None':
 
-            placer = processPlace(ast)
+            placer = processPlace(data)
 
             pprint(placer)
-
-
 
             clist = List.objects.get(id = self.kwargs['pk'])
 
@@ -109,6 +123,7 @@ class PlacesList(DetailView):
         context['geoj'] = gj
         # context['lists'] = List.objects.all()
         return self.render_to_response(context)
+
 
     def render_to_response(self, context, **response_kwargs):
         """
@@ -177,9 +192,28 @@ def places(request):
 
 
     if request.method == 'POST':
-        ast = str(request.POST.get('searchTextField'))
-        if ast != 'None': ## A new place is added
-            placer = processPlace(ast)
+
+        data = {}
+
+        data['name'] = str(request.POST.get('searchName').encode('utf8'))
+
+        data['neighborhood'] = str(request.POST.get('searchNeighborhood').encode('utf8'))
+
+        data['address'] = str(request.POST.get('searchAddress').encode('utf8'))
+
+        data['city'] = str(request.POST.get('searchCity').encode('utf8'))
+
+        data['state'] = str(request.POST.get('searchState').encode('utf8'))
+
+        data['url'] = str(request.POST.get('searchURL').encode('utf8'))
+
+        print(data)
+
+
+
+        if data != 'None':
+
+            placer = processPlace(data)
 
             pprint(placer)
 
@@ -221,111 +255,111 @@ def places(request):
 def index(request):
     print "index: " + str(request.user)
 
-    if not request.user.is_active:
-        if request.GET.items():
-            if profile_track == 'twitter':
-                oauth_verifier = request.GET['oauth_verifier']
-                getTwitter.get_access_token_url(oauth_verifier)
-
-                try:
-                    user = User.objects.get(username = getTwitter.username + '_twitter')#(username=getTwitter.username)
-                except User.DoesNotExist:
-                    username = getTwitter.username + '_twitter'
-                    new_user = User.objects.create_user(username, username+'@madewithtwitter.com', 'password')
-                    new_user.save()
-                    profile = TwitterProfile(user = new_user,oauth_token = getTwitter.oauth_token, oauth_token_secret= getTwitter.oauth_token_secret, twitter_user=getTwitter.username)
-                    profile.save()
-                user = authenticate(username=getTwitter.username+'_twitter', password='password')
-                login(request, user)
-            elif profile_track == 'instagram':
-                code = request.GET['code']
-                getInstagram.get_access_token(code)
-
-                try:
-                    user = User.objects.get(username=getInstagram.user_data['username']+'_instagram')
-                except User.DoesNotExist:
-                    username = getInstagram.user_data['username']+'_instagram'
-                    new_user = User.objects.create_user(username, username+'@madewithinstagram.com', 'password')
-                    new_user.save()
-                    profile = InstagramProfile(user = new_user, access_token = getInstagram.access_token, instagram_user=getInstagram.user_data['username'])
-                    profile.save()
-                user = authenticate(username=getInstagram.user_data['username']+'_instagram' , password='password')
-                login(request, user)
-
-            elif profile_track == 'facebook':
-                code = request.GET['code']
-                getFacebook.get_access_token(code)
-                userInfo = getFacebook.get_user_info()
-                username = userInfo['first_name'] + userInfo['last_name']
-
-                try:
-                    user = User.objects.get(username=username+'_facebook')
-                except User.DoesNotExist:
-                    new_user = User.objects.create_user(username+'_facebook', username+'@madewithfacbook', 'password')
-                    new_user.save()
-
-                    try:
-                        profile = FacebookProfile.objects.get(user=new_user.id)
-                        profile.access_token = getFacebook.access_token
-                    except:
-                        profile = FacebookProfile()
-                        profile.user = new_user
-                        profile.fb_user_id = userInfo['id']
-                        profile.profile_url = userInfo['link']
-                        profile.access_token = getFacebook.access_token
-                    profile.save()
-                user = authenticate(username=username+'_facebook', password='password')
-                login(request, user)
-
-            elif profile_track == 'google':
-                code = request.GET['code']
-                state = request.GET['state']
-                getGoogle.get_access_token(code, state)
-                userInfo = getGoogle.get_user_info()
-                username = userInfo['given_name'] + userInfo['family_name']
-
-                try:
-                    user = User.objects.get(username=username+'_google')
-                except User.DoesNotExist:
-                    new_user = User.objects.create_user(username+'_google', username+'@madewithgoogleplus', 'password')
-                    new_user.save()
-
-                    try:
-                        profle = GoogleProfile.objects.get(user = new_user.id)
-                        profile.access_token = getGoogle.access_token
-                    except:
-                        profile = GoogleProfile()
-                        profile.user = new_user
-                        profile.google_user_id = userInfo['id']
-                        profile.access_token = getGoogle.access_token
-                        profile.profile_url = userInfo['link']
-                    profile.save()
-                user = authenticate(username=username+'_google', password='password')
-                login(request, user)
-
-
-
-    else:
-        if request.GET.items():
-            user = User.objects.get(username = request.user.username)
-            if profile_track == 'twitter':
-                oauth_verifier = request.GET['oauth_verifier']
-                getTwitter.get_access_token_url(oauth_verifier)
-
-                try:
-                    twitterUser = TwitterProfile.objects.get(user = user.id)
-                except TwitterProfile.DoesNotExist:
-                    profile = TwitterProfile(user = user, oauth_token = getTwitter.oauth_token, oauth_token_secret= getTwitter.oauth_token_secret, twitter_user=getTwitter.username)
-                    profile.save()
-            elif profile_track == 'instagram':
-                code = request.GET['code']
-                getInstagram.get_access_token(code)
-
-                try:
-                    instagramUser = InstagramProfile.objects.get(user= user.id)
-                except InstagramProfile.DoesNotExist:
-                    profile = InstagramProfile(user = user, access_token = getInstagram.access_token, instagram_user=getInstagram.user_data['username'])
-                    profile.save()
+    # if not request.user.is_active:
+    #     if request.GET.items():
+    #         # if profile_track == 'twitter':
+    #         #     oauth_verifier = request.GET['oauth_verifier']
+    #         #     getTwitter.get_access_token_url(oauth_verifier)
+    #         #
+    #         #     try:
+    #         #         user = User.objects.get(username = getTwitter.username + '_twitter')#(username=getTwitter.username)
+    #         #     except User.DoesNotExist:
+    #         #         username = getTwitter.username + '_twitter'
+    #         #         new_user = User.objects.create_user(username, username+'@madewithtwitter.com', 'password')
+    #         #         new_user.save()
+    #         #         profile = TwitterProfile(user = new_user,oauth_token = getTwitter.oauth_token, oauth_token_secret= getTwitter.oauth_token_secret, twitter_user=getTwitter.username)
+    #         #         profile.save()
+    #         #     user = authenticate(username=getTwitter.username+'_twitter', password='password')
+    #         #     login(request, user)
+    #         # elif profile_track == 'instagram':
+    #         #     code = request.GET['code']
+    #         #     getInstagram.get_access_token(code)
+    #         #
+    #         #     try:
+    #         #         user = User.objects.get(username=getInstagram.user_data['username']+'_instagram')
+    #         #     except User.DoesNotExist:
+    #         #         username = getInstagram.user_data['username']+'_instagram'
+    #         #         new_user = User.objects.create_user(username, username+'@madewithinstagram.com', 'password')
+    #         #         new_user.save()
+    #         #         profile = InstagramProfile(user = new_user, access_token = getInstagram.access_token, instagram_user=getInstagram.user_data['username'])
+    #         #         profile.save()
+    #         #     user = authenticate(username=getInstagram.user_data['username']+'_instagram' , password='password')
+    #         #     login(request, user)
+    #         #
+    #         # elif profile_track == 'facebook':
+    #         #     code = request.GET['code']
+    #         #     getFacebook.get_access_token(code)
+    #         #     userInfo = getFacebook.get_user_info()
+    #         #     username = userInfo['first_name'] + userInfo['last_name']
+    #         #
+    #         #     try:
+    #         #         user = User.objects.get(username=username+'_facebook')
+    #         #     except User.DoesNotExist:
+    #         #         new_user = User.objects.create_user(username+'_facebook', username+'@madewithfacbook', 'password')
+    #         #         new_user.save()
+    #         #
+    #         #         try:
+    #         #             profile = FacebookProfile.objects.get(user=new_user.id)
+    #         #             profile.access_token = getFacebook.access_token
+    #         #         except:
+    #         #             profile = FacebookProfile()
+    #         #             profile.user = new_user
+    #         #             profile.fb_user_id = userInfo['id']
+    #         #             profile.profile_url = userInfo['link']
+    #         #             profile.access_token = getFacebook.access_token
+    #         #         profile.save()
+    #         #     user = authenticate(username=username+'_facebook', password='password')
+    #         #     login(request, user)
+    #         #
+    #         # elif profile_track == 'google':
+    #         #     code = request.GET['code']
+    #         #     state = request.GET['state']
+    #         #     getGoogle.get_access_token(code, state)
+    #         #     userInfo = getGoogle.get_user_info()
+    #         #     username = userInfo['given_name'] + userInfo['family_name']
+    #         #
+    #         #     try:
+    #         #         user = User.objects.get(username=username+'_google')
+    #         #     except User.DoesNotExist:
+    #         #         new_user = User.objects.create_user(username+'_google', username+'@madewithgoogleplus', 'password')
+    #         #         new_user.save()
+    #         #
+    #         #         try:
+    #         #             profle = GoogleProfile.objects.get(user = new_user.id)
+    #         #             profile.access_token = getGoogle.access_token
+    #         #         except:
+    #         #             profile = GoogleProfile()
+    #         #             profile.user = new_user
+    #         #             profile.google_user_id = userInfo['id']
+    #         #             profile.access_token = getGoogle.access_token
+    #         #             profile.profile_url = userInfo['link']
+    #         #         profile.save()
+    #         #     user = authenticate(username=username+'_google', password='password')
+    #         #     login(request, user)
+    #
+    #
+    #
+    # else:
+    #     if request.GET.items():
+    #         user = User.objects.get(username = request.user.username)
+    #         # if profile_track == 'twitter':
+    #         #     oauth_verifier = request.GET['oauth_verifier']
+    #         #     getTwitter.get_access_token_url(oauth_verifier)
+    #         #
+    #         #     try:
+    #         #         twitterUser = TwitterProfile.objects.get(user = user.id)
+    #         #     except TwitterProfile.DoesNotExist:
+    #         #         profile = TwitterProfile(user = user, oauth_token = getTwitter.oauth_token, oauth_token_secret= getTwitter.oauth_token_secret, twitter_user=getTwitter.username)
+    #         #         profile.save()
+    #         # elif profile_track == 'instagram':
+    #         #     code = request.GET['code']
+    #         #     getInstagram.get_access_token(code)
+    #         #
+    #         #     try:
+    #         #         instagramUser = InstagramProfile.objects.get(user= user.id)
+    #         #     except InstagramProfile.DoesNotExist:
+    #         #         profile = InstagramProfile(user = user, access_token = getInstagram.access_token, instagram_user=getInstagram.user_data['username'])
+    #         #         profile.save()
 
 
     context = {'hello': 'world'}

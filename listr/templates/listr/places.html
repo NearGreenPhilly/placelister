@@ -12,6 +12,12 @@
             <form id="place_form" method="post" action="/listr/places/">
                 {% csrf_token %}
             <input id="searchTextField" name="searchTextField" type="text" size="50">
+            <input hidden id="searchName" name="searchName" type="text" size="45">
+            <input hidden id="searchAddress" name="searchAddress" type="text" size="45">
+            <input hidden id="searchCity" name="searchCity" type="text" size="45">
+            <input hidden id="searchState" name="searchState" type="text" size="45">
+            <input hidden id="searchNeighborhood" name="searchNeighborhood" type="text" size="45">
+            <input hidden id="searchURL" name="searchURL" type="text" size="45">
             <button type="submit" class="btn btn-primary">Submit</button>
             </form>
         </div>
@@ -109,6 +115,33 @@
         var input = document.getElementById('searchTextField');
 
         var autocomplete = new google.maps.places.Autocomplete(input);
+
+        autocomplete.addListener('place_changed', fillInAddress);
+
+        function fillInAddress() {
+          // Get the place details from the autocomplete object.
+          var place = autocomplete.getPlace();
+
+            console.log(place);
+            console.log(place.address_components[3].long_name);
+
+            $("#searchName").val(place.name);
+            var address = place.address_components[0].short_name + ' ' + place.address_components[1].short_name;
+            $("#searchAddress").val(address);
+            $("#searchCity").val(place.address_components[3].long_name);
+            $("#searchNeighborhood").val(place.address_components[2].short_name);
+            $("#searchURL").val(place.url);
+
+            if (place.address_components[4].types[0] = 'administrative_area_level_1') {
+                $("#searchState").val(place.address_components[4].short_name);
+            }
+            else {
+                $("#searchState").val(place.address_components[5].short_name);
+            }
+
+
+        }
+
         }
 
         google.maps.event.addDomListener(window, 'load', initialize);

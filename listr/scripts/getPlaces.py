@@ -16,7 +16,7 @@ def doSearch(place):
 
     # You may prefer to use the text_search API, instead.
     query_result = google_places.nearby_search(
-            location=loc_st, keyword=place['name'],
+            location=loc_st, keyword=place['name'].decode('utf-8'),
             radius=20000)
 
     return query_result
@@ -29,6 +29,8 @@ def makePlace(aplace):
     ap.type = aplace['type']
     ap.city = aplace['city']
     ap.address = aplace['address']
+    ap.neighborhood = aplace['neighborhood']
+    ap.url = aplace['url']
     ap.state = aplace['state']
     ap.lon = aplace['lon']
     ap.lat = aplace['lat']
@@ -38,26 +40,8 @@ def makePlace(aplace):
 
     ap.save()
 
-def processPlace(ast):
+def processPlace(new_place):
 
-
-    stateDict = {
-        'New York' : 'NY'
-        }
-
-    the_place_result = ast.split(",")
-    new_place = {}
-    aplace = {}
-    new_place['name'] = str(the_place_result[0].encode('utf8')).strip()
-    new_place['city'] = str(the_place_result[len(the_place_result)-3].encode('utf8')).strip()
-    new_place['state'] = str(the_place_result[len(the_place_result)-2].encode('utf8')).strip()
-    if len(new_place['state']) != 2:
-        new_place['city'] = new_place['state']
-        new_place['state'] = stateDict[new_place['city']]
-        new_place['context'] = str(the_place_result[len(the_place_result)-3].encode('utf8')).strip()
-
-    if len(the_place_result) > 4:
-        new_place['context'] = str(the_place_result[1].encode('utf8')).strip()
 
     query_results = doSearch(new_place)
 
@@ -67,10 +51,9 @@ def processPlace(ast):
 
         if isMade == False:
 
-            if str((gresult.name).encode('utf8')) == new_place['name'] or str((gresult.name).encode('utf8')) in new_place['name'] or str((gresult.name).encode('utf8')).replace("'","") in new_place['name'].replace("'",""):
+            if str((gresult.name).encode('utf8')) == new_place['name']:
 
                 # print("Name is the same")
-
 
                 aplace = new_place
                 aplace['lat'] = float(gresult.geo_location['lat'])
@@ -82,31 +65,20 @@ def processPlace(ast):
 
                 a = gresult.formatted_address.split(",")
 
-                city = str(a[len(a)-3].encode('utf8')).strip()
-                state = str(a[len(a)-2].encode('utf8')).strip()
+                this_address = str(a[0].encode('utf8'))
+                aplace['type'] = str(gresult.types[0].encode('utf8'))
 
 
-                if city == new_place['city']:
 
-                    # print("City is the same")
-
-                    aplace['address'] = str(a[0].encode('utf8'))
-                    aplace['type'] = str(gresult.types[0].encode('utf8'))
-
-                    cplaces = Place.objects.filter(name=aplace['name'])
+                cplaces = Place.objects.filter(name=aplace['name'])
 
 
-                    if len(cplaces) == 0:
-                        # if 'context' in aplace:
-                        #     if aplace['context'] in aplace['address']:
-                        #
-                        #         makePlace(aplace)
-                        # else:
-                        #     makePlace(aplace)
+                if len(cplaces) == 0:
 
-                        makePlace(aplace)
-                        isMade = True
-                        print("Place made")
+
+                    makePlace(aplace)
+                    isMade = True
+                    print("Place made")
 
 
                     # else:
