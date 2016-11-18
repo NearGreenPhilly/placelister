@@ -67,10 +67,10 @@ def processPlace(new_place):
 
                 this_address = str(a[0].encode('utf8'))
                 aplace['type'] = str(gresult.types[0].encode('utf8'))
+                aplace['url'] = str(gresult.url)
 
 
-
-                cplaces = Place.objects.filter(name=aplace['name'])
+                cplaces = Place.objects.filter(name=aplace['name'], address=aplace['address'])
 
 
                 if len(cplaces) == 0:

@@ -119,6 +119,7 @@ class PlacesList(DetailView):
 
         context['clist'] = [clist]
         context['listid'] = self.kwargs['pk']
+        context['user'] = clist.created_by
         context['places'] = list(clist.places.all())
         context['geoj'] = gj
         # context['lists'] = List.objects.all()
