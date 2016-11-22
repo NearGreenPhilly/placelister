@@ -8,7 +8,7 @@
 
     <script src="https://maps.googleapis.com/maps/api/js?v=3.exp&sensor=false&libraries=places&key=AIzaSyCUSkUaTU4DJhuheYoh3_x2y1BBD40N3yc"></script>
 
-
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.7/angular.min.js"></script>
 
 
 </head>
@@ -60,8 +60,7 @@
                     </div>
                     <div id="{{ p.id }}" class="panel-collapse collapse">
                         <div class="panel-body">
-                            <div class="col-sm-12 text-center">
-                            Type: {{ p.type }} <br>
+                            <div class="col-sm-12 text-left">
                             Address: {{ p.address }} <br>
                             Neighborhood: {{ p.neighborhood }} <br>
                             URL: <a href="{{ p.url }}" target="_blank">{{ p.url }}</a><br>
@@ -77,21 +76,25 @@
     <br>
 
 
+    {% if request.user.is_authenticated %}
+         {% if request.user.username in lusers %}
+            <div class="col-sm-12">
+                <h3>Add a new place </h3>
+                <form id="place_form" method="post" action={% url 'place_list' listid %}>
+                        {% csrf_token %}
+                    <input id="searchTextField" name="searchTextField" type="text" size="45">
+                    <input hidden id="searchName" name="searchName" type="text" size="45">
+                    <input hidden id="searchAddress" name="searchAddress" type="text" size="45">
+                    <input hidden id="searchCity" name="searchCity" type="text" size="45">
+                    <input hidden id="searchState" name="searchState" type="text" size="45">
+                    <input hidden id="searchNeighborhood" name="searchNeighborhood" type="text" size="45">
+                    <input hidden id="searchURL" name="searchURL" type="text" size="45">
+                    <button type="submit" class="btn btn-primary">Add</button>
+                </form>
+            </div>
+        {% endif %}
 
-    <div class="col-sm-12">
-        <h3>Add a new place</h3>
-        <form id="place_form" method="post" action={% url 'place_list' listid %}>
-                {% csrf_token %}
-            <input id="searchTextField" name="searchTextField" type="text" size="45">
-            <input hidden id="searchName" name="searchName" type="text" size="45">
-            <input hidden id="searchAddress" name="searchAddress" type="text" size="45">
-            <input hidden id="searchCity" name="searchCity" type="text" size="45">
-            <input hidden id="searchState" name="searchState" type="text" size="45">
-            <input hidden id="searchNeighborhood" name="searchNeighborhood" type="text" size="45">
-            <input hidden id="searchURL" name="searchURL" type="text" size="45">
-            <button type="submit" class="btn btn-primary">Add</button>
-        </form>
-    </div>
+    {% endif %}
 
     </div>
 
@@ -162,7 +165,14 @@
 
     function onEachFeature(feature, layer) {
 
-        layer.bindPopup(feature.properties.name);
+        layer.bindPopup(
+                feature.properties.name +
+                '<br>' +
+                feature.properties.address +
+                '<br>' +
+                'Neighborhood: ' +feature.properties.neighborhood
+
+        );
     }
 
 

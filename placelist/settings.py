@@ -57,6 +57,7 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django.contrib.gis',
+    'tastypie',
     'bootstrapform',
     'rest_framework',
     'listr',

@@ -11,7 +11,7 @@
 
     <body>
       <div class="container text-center">
-        <form class="form-signin" id="login_form" method="post" action="/listr/login/">
+        <form class="form-signin" id="login_form" method="post" action="/listr/login/" autocomplete="off">
           {% csrf_token %}
           {% load bootstrap %}
           <h2 class="form-signin-heading">Login</h2>

@@ -53,7 +53,7 @@ class PlacesList(DetailView):
 
         gj = serialize('geojson', clist.places.all(),
           geometry_field='point',
-          fields=('name',))
+          fields=('name','neighborhood','address',))
 
         # pprint(gj)
 
@@ -61,6 +61,7 @@ class PlacesList(DetailView):
         context['clist'] = [clist]
         context['listid'] = self.kwargs['pk']
         context['places'] = pla
+        context['lusers'] = [clist.created_by.username]
         context['geoj'] = gj
         context['lists'] = List.objects.all()
 
@@ -115,11 +116,14 @@ class PlacesList(DetailView):
 
         gj = serialize('geojson', clist.places.all(),
           geometry_field='point',
-          fields=('name',))
+          fields=('name', 'neighborhood', 'address',))
+
 
         context['clist'] = [clist]
         context['listid'] = self.kwargs['pk']
-        context['user'] = clist.created_by
+        context['lusers'] = [clist.created_by.username]
+
+        print(clist.created_by)
         context['places'] = list(clist.places.all())
         context['geoj'] = gj
         # context['lists'] = List.objects.all()
@@ -407,7 +411,7 @@ def user_login(request):
         if user:
             if user.is_active:
                 login(request, user)
-                return HttpResponseRedirect('/listr/api/')
+                return HttpResponseRedirect('/listr/lists/')
             else:
                 return HttpResponse("Your Django Hackathon account is disabled.")
         else:
