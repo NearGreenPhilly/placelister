@@ -26,4 +26,10 @@ python-google-places==1.2.0
 requests==2.6.0
 requests-oauthlib==0.4.2
 simplejson==3.6.5
-
+django-tastypie==0.13.3
+python-dateutil==2.6.0
+python-mimeparse==1.6.0
+pytz==2016.6.1
+six==1.10.0
+snowballstemmer==1.2.1
+sphinx-rtd-theme==0.1.9
